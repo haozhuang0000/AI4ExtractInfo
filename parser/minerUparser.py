@@ -1,3 +1,8 @@
+"""
+This script is from the Miner project:
+https://github.com/opendatalab/MinerU/blob/master/demo/magic_pdf_parse_main.py
+"""
+
 import copy
 import json
 import os
