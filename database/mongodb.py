@@ -34,7 +34,6 @@ if __name__ == '__main__':
 
     mongodb_handler = MongoDBHandler()
     db = mongodb_handler.get_database()
-    col = db[os.environ['COL']]
     md_path = os.path.join(os.getcwd(), '../', 'output_dir')
     contents = os.listdir(md_path)
     for output in contents:
@@ -42,9 +41,18 @@ if __name__ == '__main__':
         jsons_ls = os.listdir(jsons_path)
         for json_data in jsons_ls:
             if 'xy' in json_data:
+                col = db[os.environ['COL_XY']]
                 file_path = os.path.join(jsons_path, json_data)
                 with open(file_path, "r") as file:
                     data = json.load(file)
                 data = json_repair.loads(data)
+                data['rp_title'] = output
+                col.insert_one(data)
+
+            if 'gq' in json_data:
+                col = db[os.environ['COL_GQ']]
+                file_path = os.path.join(jsons_path, json_data)
+                with open(file_path, "r") as file:
+                    data = json.load(file)
                 data['rp_title'] = output
                 col.insert_one(data)

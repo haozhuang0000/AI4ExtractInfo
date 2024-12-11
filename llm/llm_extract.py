@@ -35,6 +35,7 @@ def process_markdown_with_gpt(markdown_content, questions, q_type):
         if q_type == 'gq':
             prompt = f"Based on the following academic paper content:\n\n{markdown_content}\n\n{question}"
         elif q_type == 'xy':
+            formulas_example = """$$ E X B M S_{i,k}=\frac{B M S_{i,k}-N B M S_{i}}{N B P S_{i}}.$$"""
             prompt = f"""
             You are a statistics expert specializing in finance. Your task is to identify the variables X or Y used in the model and organize them in a structured JSON format.
             You will be provided with a markdown content and a question.
@@ -42,15 +43,34 @@ def process_markdown_with_gpt(markdown_content, questions, q_type):
             **markdown_content**: \n{markdown_content}
             **question**: \n{question}
             **json_example**: \n{prompt_example.example['json_example']}
+            ***
+            You must focus on only MATH FORMULAS:
+            
+            Key Instruction for Focusing on MATH FORMULAS in Markdown
+                You need to follow these steps:
+                    - Focus only on content in mathematical format. These formulas are typically enclosed within $$ symbols, e.g., $$ FORMULA $$.
+                    - Do not include any text, symbols, or variables (e.g., X, Y) that are not part of a properly formatted mathematical expression.
+                    - Example of mathematical format in Markdown: {formulas_example}
+                    - Identify and convert mathematical variables or terms into human-understandable phrases based on the context of the research paper.
+                        - Use the research paper context to clarify abbreviations. For example:
+                            - LMktCap → "Logarithm of Market Capitalization"
+                            - IVol → "Idiosyncratic Volatility"
+                        - Ensure that each term is accurately translated while retaining its original meaning and relevance within the paper’s context.
+                        - Do not make assumptions without clear evidence from the paper. If the meaning is unclear, use original mathematical term
+                        
+                    - Ensure that each term is accurately translated while retaining its original meaning and relevance within the paper’s context.
+            ***
             
             I need to extract unique equations with their independent (X) and dependent (Y) variables from research papers. Each equation should have:
                 - A unique set of independent variables (X).
                 - A unique dependent variable (Y).
                 - No overlap or duplication between equations.
                 - Clear labels like "Equation_1", "Equation_2", etc.
+
             Ensure that:
                 - Each equation is unique and meaningful.
                 - If any independent variables are reused, they must lead to a different dependent variable.
+            
             """
         response = query_gpt(prompt)
         extracted_data[question] = response
@@ -61,7 +81,7 @@ def main():
     contents = os.listdir(md_path)
     for markdown_file in contents:
         # markdown_file = "../../[AR] -2011 - Investor Trading and the Post-Earnings-Announcement Drift/[AR] -2011 - Investor Trading and the Post-Earnings-Announcement Drift.md"
-        output_dir = f"output_dir/{markdown_file}"
+        output_dir = f"../output_dir/{markdown_file}"
         os.makedirs(output_dir, exist_ok=True)
         markdown_content = read_markdown(md_path, markdown_file)
 

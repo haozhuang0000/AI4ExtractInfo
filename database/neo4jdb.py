@@ -1,15 +1,15 @@
 import os
 from database.mongodb import MongoDBHandler
 from neo4j import GraphDatabase
-from langchain.chains import GraphCypherQAChain
-from langchain.llms import OpenAI
-from langchain.graphs import Neo4jGraph
 from typing import List, Dict
-import pandas as pd
+import warnings
+
+warnings.filterwarnings("ignore")
+
 def get_data():
     dbhandler = MongoDBHandler()
     db = dbhandler.get_database()
-    col = db['test']
+    col = db[os.environ['COL_XY']]
     data = col.find({})
     data = [i for i in data]
     return data
@@ -56,28 +56,8 @@ class Neo4jHandler:
                                 y_name=y_variable
                             )
 
-class Neo4jLangChainHandler:
-    def __init__(self):
-        # Load Neo4j credentials from environment variables
-        self.graph = Neo4jGraph(
-            url=os.getenv("KG_URI"),
-            username=os.getenv("KG_USERNAME"),
-            password=os.getenv("KG_PWD")
-        )
-        print("LangChain Neo4j Graph initialized successfully.")
-
-    def query_graph(self, cypher_query: str):
-        result = self.graph.query(cypher_query)
-        return result
-
 if __name__ == '__main__':
 
     data = get_data()
     neo4j_handler = Neo4jHandler()
     neo4j_handler.create_graph(data)
-    neo4j_langchain_handler = Neo4jLangChainHandler()
-    llm = OpenAI(temperature=0)
-    chain = GraphCypherQAChain.from_llm(llm=llm, graph=neo4j_langchain_handler.graph, allow_dangerous_requests=True)
-    query = "List all X for the node **Average excess net-buy of small trades**."
-    result = chain.run(query)
-    print(result)
