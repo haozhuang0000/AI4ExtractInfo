@@ -1,5 +1,5 @@
 """
-This script is from the Miner project:
+This script is from the MinerU project:
 https://github.com/opendatalab/MinerU/blob/master/demo/magic_pdf_parse_main.py
 """
 
